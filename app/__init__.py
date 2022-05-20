@@ -28,15 +28,6 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 ma = Marshmallow(app)
 
-# creating crontab
-
-from apscheduler.schedulers.background import BackgroundScheduler
-from app.helpers import patientsHelper
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=patientsHelper().auto_update_bigquery, trigger="cron", hour=23, minute=59)
-scheduler.start()
-
 # error handling
 class Error(Exception):
     status_code = 400
@@ -59,6 +50,15 @@ def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
+
+# creating crontab
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from app.helpers import patientsHelper
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=patientsHelper().auto_update_bigquery, trigger="cron", second=2)
+scheduler.start()
 
 # register the blueprint
 from app.employees.api import user_route

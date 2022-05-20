@@ -8,7 +8,6 @@ click==8.1.3
 colorama==0.4.4
 Flask==2.0.1
 Flask-Alembic==2.0.1
-flask-crontab==0.1.2
 flask-marshmallow==0.14.0
 Flask-Migrate==3.1.0
 Flask-Pydantic==0.9.0

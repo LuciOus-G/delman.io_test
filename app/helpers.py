@@ -96,7 +96,7 @@ class patientsHelper(object):
         for row in data:
             get_patients = Patients.query.filter_by(no_ktp=row.no_ktp)
             if get_patients:
-                for k, v in row:
+                for k, v in dict(row).items():
                     try:
                         setattr(get_patients, k, v)
                         db.session.add(get_patients)
@@ -104,10 +104,7 @@ class patientsHelper(object):
                     except:
                         pass
             else:
-                raise Error(
-                    message="user with this KTP number not found",
-                    status_code=404
-                )
+                pass
 
 # catxh error
 dtserializer = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
