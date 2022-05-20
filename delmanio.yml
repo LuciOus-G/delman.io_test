@@ -1,0 +1,49 @@
+version: '3.1'
+
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+    links:
+      - db:db
+    networks:
+      - delimanio
+
+  db:
+    image: postgres:11
+    ports:
+      - 5433:5432
+    restart: always
+    environment:
+      POSTGRES_USER: delmanio
+      POSTGRES_PASSWORD: delmanio123
+      POSTGRES_DB: delmanio_db
+    networks:
+      - delimanio
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - '8080:80'
+    restart: always
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    links:
+      - "db:pgsql-server"
+    networks:
+      - delimanio
+
+volumes:
+  db-data:
+  pgadmin-data:
+
+networks:
+  delimanio:
+    driver: bridge
