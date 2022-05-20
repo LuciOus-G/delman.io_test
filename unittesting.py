@@ -1,6 +1,12 @@
+import os
+import sys
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(THIS_DIR, os.pardir))
+
+
 from app import app
 import unittest
-from flask import g
 
 class unittesting(unittest.TestCase):
     def setUp(self):
@@ -35,3 +41,6 @@ class unittesting(unittest.TestCase):
         tester = app.test_client(self)
         response = tester.get('/login', content_type='application/json')
         self.assertEqual(response.status_code, 405)
+
+if __name__ == '__main__':
+    unittest.main()

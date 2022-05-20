@@ -69,14 +69,14 @@ def get_doctors(id):
     method_type = request.method
     get_data = User.query.get(id)
 
+    if not get_data:
+        raise Error(
+            message='Could not find the data',
+            status_code=404
+        )
+
     if method_type == 'GET':
         generate_response = schema.usersResponse(exclude=['password', 'salt']).dump(get_data)
-
-        if not get_data:
-            raise Error(
-                message='Could not find the data',
-                status_code=404
-            )
 
         return jsonify(generate_response)
 

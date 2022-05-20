@@ -1,6 +1,9 @@
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import ForeignKeyViolation
+
 from app.models import Appointments, User
 from app import schema, Error
 from flask_pydantic import validate
@@ -13,19 +16,25 @@ appointment_route = Blueprint('appointment', __name__)
 # register API for appointment
 
 @appointment_route.route('/appointment', methods=['GET', 'POST'])
-@validate()
 @login_require
+@validate()
 def reg_doctors(body: schema.appointmentSchemas):
     method_type = request.method
 
     if method_type == 'POST':
         try:
             # validation
-            date_time = datetime.strptime(body.datetime, '%d/%m/%y %H:%M')
+            date_time = datetime.strptime(body.datetime, '%d/%m/%Y %H:%M')
             get_dotcor_data = User.query.filter_by(id=body.doctor_id, user_type='doctor').first()
             get_any_apointment = Appointments.query.filter_by(
                 datetime=date_time
             ).all()
+
+            if not get_dotcor_data:
+                return err_response(
+                    error_code=400,
+                    message="the doctor with this id does not exist"
+                )
 
             if get_any_apointment:
                 return err_response(
@@ -54,6 +63,12 @@ def reg_doctors(body: schema.appointmentSchemas):
 
             generate_response = schema.appointmentResponse().dump(user_data)
             return jsonify(generate_response)
+        except IntegrityError as e:
+            assert isinstance(e.orig, ForeignKeyViolation)
+            raise Error(
+                message='doctor or patiens with this id does not exist',
+                status_code=400
+            )
         except Exception as e:
             raise Error(
                 message='something went wrong with error: {0}'.format(e),
@@ -96,13 +111,21 @@ def get_doctors(id):
     if method_type == 'PUT':
         payload = dict(request.get_json())
 
-        if get_data:
-            for k, v in payload.items():
-                setattr(get_data, k, v)
+        try:
+            if get_data:
+                for k, v in payload.items():
+                    setattr(get_data, k, v)
 
-            db.session.add(get_data)
-            db.session.commit()
-            return schema.appointmentResponse().dump(get_data)
+                db.session.add(get_data)
+                db.session.commit()
+                return schema.appointmentResponse().dump(get_data)
+        except IntegrityError as e:
+            assert isinstance(e.orig, ForeignKeyViolation)
+            raise Error(
+                message='canot change, the doctor or patiens with this does not exist. please change the patiens '
+                        'or doctor first ',
+                status_code=400
+            )
 
     if method_type == 'DELETE':
         if get_data:

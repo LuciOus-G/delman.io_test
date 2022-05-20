@@ -123,12 +123,13 @@ def login_require(func):
         token = request.headers.get("Authorization", None)
 
         if token:
-            token = token.split('bearer')
+            token = token.split('Bearer ')[1]
 
         if not token:
             raise Error(
                 message="token unavailable"
             )
+
 
         verify_token = authHelpers().decode_jwt(token)
 

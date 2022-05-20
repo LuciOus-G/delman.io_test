@@ -12,8 +12,8 @@ patient_route = Blueprint('patient', __name__)
 # register API for patients
 
 @patient_route.route('/patients', methods=['GET', 'POST'])
-@validate()
 @login_require
+@validate()
 def reg_patient(body: schema.patientSchemas):
     method_type = request.method
 
