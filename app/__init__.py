@@ -57,7 +57,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app.helpers import patientsHelper
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=patientsHelper().auto_update_bigquery, trigger="cron", second=2)
+scheduler.add_job(func=patientsHelper().auto_update_bigquery, trigger="cron", hour=23, minute=59)
 scheduler.start()
 
 # register the blueprint
